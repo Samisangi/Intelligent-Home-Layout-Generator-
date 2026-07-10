@@ -12,6 +12,7 @@
   "dependencies": {
     "autoprefixer": "^10.5.2",
     "axios": "^1.18.1",
+    "jspdf": "^4.2.1",
     "konva": "^10.3.0",
     "postcss": "^8.5.16",
     "react": "^19.2.7",
