@@ -40,6 +40,50 @@ export const generateProjectLayouts = async (req, res, next) => {
     next(err);
   }
 };
+// @route PUT /api/layouts/:projectId/:layoutId
+export const updateLayoutRooms = async (req, res, next) => {
+  try {
+    const { projectId, layoutId } = req.params;
+    const project = await checkProjectOwnership(projectId, req.user.id);
+    if (!project) return failure(res, 404, "Project not found");
+
+    const { rooms } = req.body;
+    if (!Array.isArray(rooms) || rooms.length === 0) {
+      return failure(res, 400, "Rooms array is required");
+    }
+
+    // Basic overlap re-check on manual edits — reuse existing constraint logic
+    const overlapCheck = checkManualOverlap(rooms);
+    if (overlapCheck) {
+      return failure(res, 422, `Manual edit causes overlap between ${overlapCheck[0]} and ${overlapCheck[1]}`);
+    }
+
+    const layout = await Layout.findOneAndUpdate(
+      { _id: layoutId, project: projectId },
+      { rooms },
+      { new: true }
+    );
+    if (!layout) return failure(res, 404, "Layout not found");
+
+    return success(res, 200, "Layout updated", { layout });
+  } catch (err) {
+    next(err);
+  }
+};
+
+// Lightweight overlap check that also identifies WHICH rooms collide,
+// so the frontend can highlight the offending pair to the user.
+function checkManualOverlap(rooms) {
+  for (let i = 0; i < rooms.length; i++) {
+    for (let j = i + 1; j < rooms.length; j++) {
+      const a = rooms[i], b = rooms[j];
+      const overlapX = a.x < b.x + b.width && b.x < a.x + a.width;
+      const overlapY = a.y < b.y + b.height && b.y < a.y + a.height;
+      if (overlapX && overlapY) return [a.type, b.type];
+    }
+  }
+  return null;
+}
 
 // @route GET /api/layouts/:projectId
 export const getProjectLayouts = async (req, res, next) => {

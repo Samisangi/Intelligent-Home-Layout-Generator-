@@ -8,5 +8,5 @@ router.use(authMiddleware);
 
 router.post("/:projectId/generate", generateProjectLayouts);
 router.get("/:projectId", getProjectLayouts);
-
+router.put("/:projectId/:layoutId", updateLayoutRooms);
 export default router;
