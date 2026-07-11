@@ -4,7 +4,31 @@ import Layout from "../models/Layout.model.js";
 import { generateLayouts } from "../services/layoutEngine/index.js";
 import { checkProjectOwnership } from "../utils/checkProjectOwnership.js";
 import { success, failure } from "../utils/apiResponse.js";
+import { scoreLayout } from "../services/layoutEngine/scoring.js";
+import Plot from "../models/Plot.model.js";
 
+// @route POST /api/layouts/:projectId/:layoutId/rescore
+export const rescoreLayout = async (req, res, next) => {
+  try {
+    const { projectId, layoutId } = req.params;
+    const project = await checkProjectOwnership(projectId, req.user.id);
+    if (!project) return failure(res, 404, "Project not found");
+
+    const plot = await Plot.findOne({ project: projectId });
+    if (!plot) return failure(res, 400, "Plot not found for this project");
+
+    const layout = await Layout.findOne({ _id: layoutId, project: projectId });
+    if (!layout) return failure(res, 404, "Layout not found");
+
+    const newScore = scoreLayout(layout.rooms, plot);
+    layout.score = newScore;
+    await layout.save();
+
+    return success(res, 200, "Score recalculated", { layout });
+  } catch (err) {
+    next(err);
+  }
+};
 // @route POST /api/layouts/:projectId/generate
 export const generateProjectLayouts = async (req, res, next) => {
   try {
