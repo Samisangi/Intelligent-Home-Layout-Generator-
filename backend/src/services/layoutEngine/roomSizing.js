@@ -76,11 +76,14 @@ export const buildRoomList = (requirement, plot) => {
 
 /** Quick feasibility check before running the engine */
 export const checkFeasibility = (rooms, plot) => {
+  const CORRIDOR_WIDTH = 3.5;
   const setbackArea =
     plot.width * plot.depth -
     (plot.width - plot.setback.left - plot.setback.right) *
       (plot.depth - plot.setback.front - plot.setback.back);
-  const usableArea = plot.width * plot.depth - setbackArea;
+  const grossUsable = plot.width * plot.depth - setbackArea;
+  const corridorArea = (plot.width - plot.setback.left - plot.setback.right) * CORRIDOR_WIDTH * 2;
+  const usableArea = grossUsable - corridorArea;
   const requiredArea = rooms.reduce((sum, r) => sum + r.area, 0);
 
   if (requiredArea > usableArea) {
@@ -88,7 +91,7 @@ export const checkFeasibility = (rooms, plot) => {
       feasible: false,
       message: `Requirements need ~${Math.round(requiredArea)} sq ft but only ${Math.round(
         usableArea
-      )} sq ft usable after setbacks. Reduce rooms or increase plot size.`,
+      )} sq ft usable after setbacks and circulation space. Reduce rooms or increase plot size.`,
     };
   }
   return { feasible: true, usableArea, requiredArea };
