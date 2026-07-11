@@ -34,6 +34,9 @@ const Login = () => {
           type="password" placeholder="Password" className="w-full border rounded p-2"
           value={form.password} onChange={(e) => setForm({ ...form, password: e.target.value })} required
         />
+        <p className="text-sm text-center mt-3">
+  No account? <Link to="/register" className="text-blue-600">Register</Link>
+</p>
         <button className="w-full bg-slate-900 text-white rounded p-2">Login</button>
       </form>
     </div>
