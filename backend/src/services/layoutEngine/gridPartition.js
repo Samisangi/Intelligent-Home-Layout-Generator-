@@ -61,28 +61,52 @@ export const partitionRect = (rect, items, orientation = "vertical") => {
  * based on road facing, then partitions rooms within each band.
  */
 export const zoneAndPartition = (usableRect, rooms, options = {}) => {
-  const { frontRatio = 0.18, publicRatio = 0.42, startOrientation = "vertical" } = options;
+  const {
+    frontRatio = 0.18,
+    publicRatio = 0.42,
+    startOrientation = "vertical",
+    corridorWidth = 3.5, // ft — standard minimum circulation width (Module 6 constraint)
+  } = options;
 
   const frontRooms = rooms.filter((r) => r.zone === "front");
   const publicRooms = rooms.filter((r) => r.zone === "public");
   const privateRooms = rooms.filter((r) => r.zone === "private");
 
-  const frontHeight = usableRect.height * frontRatio;
-  const publicHeight = usableRect.height * publicRatio;
-  const privateHeight = usableRect.height - frontHeight - publicHeight;
+  // Reserve two corridor strips: front-public and public-private
+  const corridorTotal = corridorWidth * 2;
+  const usableHeight = usableRect.height - corridorTotal;
+
+  const frontHeight = usableHeight * frontRatio;
+  const publicHeight = usableHeight * publicRatio;
+  const privateHeight = usableHeight - frontHeight - publicHeight;
 
   const frontRect = { x: usableRect.x, y: usableRect.y, width: usableRect.width, height: frontHeight };
-  const publicRect = { x: usableRect.x, y: usableRect.y + frontHeight, width: usableRect.width, height: publicHeight };
+
+  const publicRect = {
+    x: usableRect.x,
+    y: usableRect.y + frontHeight + corridorWidth,
+    width: usableRect.width,
+    height: publicHeight,
+  };
+
   const privateRect = {
     x: usableRect.x,
-    y: usableRect.y + frontHeight + publicHeight,
+    y: usableRect.y + frontHeight + corridorWidth + publicHeight + corridorWidth,
     width: usableRect.width,
     height: privateHeight,
   };
 
-  return [
+  const placedRooms = [
     ...partitionRect(frontRect, frontRooms, startOrientation),
     ...partitionRect(publicRect, publicRooms, startOrientation),
     ...partitionRect(privateRect, privateRooms, startOrientation),
   ];
+
+  // Return corridor rects too, so the frontend can render them distinctly
+  const corridors = [
+    { type: "corridor", x: usableRect.x, y: usableRect.y + frontHeight, width: usableRect.width, height: corridorWidth },
+    { type: "corridor", x: usableRect.x, y: usableRect.y + frontHeight + corridorWidth + publicHeight, width: usableRect.width, height: corridorWidth },
+  ];
+
+  return [...placedRooms, ...corridors];
 };
