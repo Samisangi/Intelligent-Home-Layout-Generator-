@@ -52,16 +52,17 @@ const LayoutViewer = () => {
   const activeLayout = allLayouts.find((l) => l.variant === activeVariant);
 
   const handleSaveEdits = async () => {
-    setSaveError("");
-    try {
-      await saveLayoutEdits(projectId, activeLayout._id, rooms);
-      setAllLayouts((prev) =>
-        prev.map((l) => (l.variant === activeVariant ? { ...l, rooms } : l))
-      );
-    } catch (err) {
-      setSaveError(err.response?.data?.message || "Failed to save — check for overlapping rooms");
-    }
-  };
+  setSaveError("");
+  try {
+    await saveLayoutEdits(projectId, activeLayout._id, rooms);
+    const { data } = await rescoreLayout(projectId, activeLayout._id);
+    setAllLayouts((prev) =>
+      prev.map((l) => (l.variant === activeVariant ? { ...l, rooms, score: data.data.layout.score } : l))
+    );
+  } catch (err) {
+    setSaveError(err.response?.data?.message || "Failed to save — check for overlapping rooms");
+  }
+};
 
   return (
     <div className="max-w-5xl mx-auto mt-10 p-4">
