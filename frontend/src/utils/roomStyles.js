@@ -10,6 +10,8 @@ export const getRoomStyle = (type) => {
   if (type === "parking") return { fill: "#d9d9d9", stroke: "#a6a6a6" };
   if (type === "foyer") return { fill: "#e8ded0", stroke: "#c2b49c" };
   if (type === "utility" || type === "store") return { fill: "#e0e0e0", stroke: "#b0b0b0" };
+  
+  if (type === "corridor") return { fill: "#f5f5f5", stroke: "#e0e0e0" };
   if (type === "prayerRoom" || type === "studyRoom") return { fill: "#e6d9f2", stroke: "#c3a8dd" };
   return { fill: "#eeeeee", stroke: "#cccccc" };
 };
