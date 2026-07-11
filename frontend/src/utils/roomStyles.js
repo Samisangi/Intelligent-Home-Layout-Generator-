@@ -13,7 +13,10 @@ export const getRoomStyle = (type) => {
   if (type === "prayerRoom" || type === "studyRoom") return { fill: "#e6d9f2", stroke: "#c3a8dd" };
   return { fill: "#eeeeee", stroke: "#cccccc" };
 };
-
+// Room types available to manually add — used by the "Add Room" dropdown
+export const ADDABLE_ROOM_TYPES = [
+  "bedroom", "bathroom", "studyRoom", "store", "balcony", "laundry", "prayerRoom",
+];
 // Turns "bedroom2" -> "Bedroom 2", "masterBedroom" -> "Master Bedroom"
 export const formatRoomLabel = (type) => {
   const withSpaces = type.replace(/([A-Z])/g, " $1").replace(/(\d+)/, " $1");
